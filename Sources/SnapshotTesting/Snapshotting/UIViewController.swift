@@ -16,6 +16,7 @@ extension Snapshotting where Value == UIViewController, Format == UIImage {
   ///   - traits: A trait collection override.
   public static func image(
     on config: ViewImageConfig,
+    waitBeforeDrawing: TimeInterval? = nil,
     precision: Float = 1,
     size: CGSize? = nil,
     traits: UITraitCollection = .init()
@@ -26,6 +27,7 @@ extension Snapshotting where Value == UIViewController, Format == UIImage {
         snapshotView(
           config: size.map { .init(safeArea: config.safeArea, size: $0, traits: config.traits) } ?? config,
           drawHierarchyInKeyWindow: false,
+          waitBeforeDrawing: waitBeforeDrawing,
           traits: traits,
           view: viewController.view,
           viewController: viewController
@@ -42,6 +44,7 @@ extension Snapshotting where Value == UIViewController, Format == UIImage {
   ///   - traits: A trait collection override.
   public static func image(
     drawHierarchyInKeyWindow: Bool = false,
+    waitBeforeDrawing: TimeInterval? = nil,
     precision: Float = 1,
     size: CGSize? = nil,
     traits: UITraitCollection = .init()
@@ -52,6 +55,7 @@ extension Snapshotting where Value == UIViewController, Format == UIImage {
         snapshotView(
           config: .init(safeArea: .zero, size: size, traits: traits),
           drawHierarchyInKeyWindow: drawHierarchyInKeyWindow,
+          waitBeforeDrawing: waitBeforeDrawing,
           traits: .init(),
           view: viewController.view,
           viewController: viewController

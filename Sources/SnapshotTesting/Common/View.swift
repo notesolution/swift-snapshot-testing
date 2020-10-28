@@ -11,6 +11,8 @@ import UIKit
 import WebKit
 #endif
 
+import XCTest
+
 #if os(iOS) || os(tvOS)
 public struct ViewImageConfig {
   public enum Orientation {
@@ -718,6 +720,7 @@ func prepareView(
 func snapshotView(
   config: ViewImageConfig,
   drawHierarchyInKeyWindow: Bool,
+  waitBeforeDrawing duration: TimeInterval?,
   traits: UITraitCollection,
   view: UIView,
   viewController: UIViewController
@@ -734,7 +737,7 @@ func snapshotView(
     // NB: Avoid safe area influence.
     if config.safeArea == .zero { view.frame.origin = .init(x: offscreen, y: offscreen) }
 
-    return (view.snapshot ?? Async { callback in
+    let snapshot: Async<UIImage> = (view.snapshot ?? Async { callback in
       addImagesForRenderedViews(view).sequence().run { views in
         callback(
           renderer(bounds: view.bounds, for: traits).image { ctx in
@@ -749,6 +752,19 @@ func snapshotView(
         view.frame = initialFrame
       }
     }).map { dispose(); return $0 }
+  
+    if let duration = duration {
+      return Async<UIImage> { callback in
+        let expectation = XCTestExpectation(description: "Wait Before Drawing")
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+          expectation.fulfill()
+        }
+        _ = XCTWaiter.wait(for: [expectation], timeout: duration + 1)
+        snapshot.run(callback)
+      }
+    }
+  
+    return snapshot
 }
 
 private let offscreen: CGFloat = 10_000
