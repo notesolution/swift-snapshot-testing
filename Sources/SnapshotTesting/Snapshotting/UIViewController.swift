@@ -18,12 +18,16 @@ extension Snapshotting where Value == UIViewController, Format == UIImage {
     on config: ViewImageConfig,
     waitBeforeDrawing: TimeInterval? = nil,
     precision: Float = 1,
+    allowedDifference: UInt8 = 1,
     size: CGSize? = nil,
     traits: UITraitCollection = .init()
     )
     -> Snapshotting {
 
-      return SimplySnapshotting.image(precision: precision).asyncPullback { viewController in
+      return SimplySnapshotting.image(
+        precision: precision,
+        allowedDifference: allowedDifference
+      ).asyncPullback { viewController in
         snapshotView(
           config: size.map { .init(safeArea: config.safeArea, size: $0, traits: config.traits) } ?? config,
           drawHierarchyInKeyWindow: false,
